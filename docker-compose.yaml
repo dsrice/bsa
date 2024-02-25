@@ -1,0 +1,46 @@
+version: '3'
+services:
+  bsa-fe:
+    container_name: bsa-fe
+    build:
+      context: ./docker/fe/
+
+    volumes:
+      - ./fe:/code
+#      - node_modules_volume:/app/node_modules
+    command: sh -c "npm run dev"
+    tty: true
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  bsa-be:
+    container_name: bsa-be
+    build:
+      context: ./docker/be/
+    volumes:
+      - ./be:/go/src/app
+    tty: true
+    environment:
+      - TZ=Asia/Tokyo
+      - APP_ROOT=/go/src/app
+      - GO_ENV=dev
+    ports:
+      - "1323:1323"
+      - "13030:13030"
+
+  bsa-db:
+    image: mysql:5.7
+    container_name: bsa-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: b_score
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      TZ: 'Asia/Tokyo'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./database/data:/var/lib/mysql
+    ports:
+      - 23306:3306
